@@ -11,6 +11,7 @@ import { useAuthStore } from '../store/auth';
 import { SkeletonMetric } from '../components/Skeleton';
 import ProgressRing from '../components/ProgressRing';
 import { EmptyOrbit } from '../components/EmptyState';
+import ThemeToggle from '../components/ThemeToggle';
 
 const PROJECT_COLORS = [
   '#3b82f6', '#7c3aed', '#10b981', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899',
@@ -166,7 +167,8 @@ export default function Dashboard() {
         api.get('/dashboard'),
         api.get('/projects'),
       ]);
-      setMetrics(dashRes.data.data);
+      const dash = dashRes.data?.data ?? dashRes.data;
+      setMetrics(dash);
       const projs = projectsRes.data.projects || [];
       setProjects(projs);
 
@@ -257,10 +259,13 @@ export default function Dashboard() {
             {format(new Date(), 'EEEE, MMMM d yyyy')} · Mission Control
           </p>
         </div>
-        <Link to="/projects" className="btn-primary gap-2">
-          <FolderKanban size={15} />
-          View Planets
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link to="/projects" className="btn-primary gap-2">
+            <FolderKanban size={15} />
+            View Planets
+          </Link>
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* Metric Cards */}

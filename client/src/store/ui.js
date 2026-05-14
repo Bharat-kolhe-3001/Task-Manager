@@ -5,6 +5,19 @@ export const useUIStore = create((set, get) => ({
   sidebarCollapsed: false,
   toggleSidebar: () => set(s => ({ sidebarCollapsed: !s.sidebarCollapsed })),
 
+  // Theme
+  theme: localStorage.getItem('orbit-theme') || 'dark',
+  toggleTheme: () => set(s => {
+    const next = s.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('orbit-theme', next);
+    if (next === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+    return { theme: next };
+  }),
+
   // Quick Launch bar (press "/" to open)
   quickLaunchOpen: false,
   quickLaunchProjectId: null,

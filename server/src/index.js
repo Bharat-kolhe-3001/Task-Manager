@@ -1,7 +1,8 @@
-import 'dotenv/config';
+import './lib/loadEnv.js';
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes.js';
+import usersRoutes from './routes/users.routes.js';
 import projectsRoutes from './routes/projects.routes.js';
 import tasksRoutes from './routes/tasks.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
@@ -37,6 +38,7 @@ app.use(
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
 app.use('/api/projects', projectsRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -50,10 +52,13 @@ app.use(errorHandler);
 const PORT = Number(process.env.PORT) || 3000;
 
 if (!process.env.DATABASE_URL) {
-  console.warn('Warning: DATABASE_URL is not set');
+  console.error(
+    'FATAL: DATABASE_URL is not set. Add it to server/.env (e.g. file:./dev.db for SQLite).',
+  );
+  process.exit(1);
 }
 if (!process.env.JWT_SECRET) {
-  console.error('FATAL: JWT_SECRET is not set. Login/signup will fail. Set JWT_SECRET in server/.env');
+  console.error('FATAL: JWT_SECRET is not set. Set JWT_SECRET in server/.env');
   process.exit(1);
 }
 

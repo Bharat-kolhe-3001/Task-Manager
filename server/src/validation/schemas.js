@@ -15,6 +15,7 @@ export const createProjectSchema = z.object({
   name: z.string().min(1).max(200),
   description: z.string().max(5000).optional().nullable(),
   color: z.string().min(1).max(32).optional(),
+  members: z.array(z.string()).optional(),
 });
 
 export const updateProjectSchema = z
@@ -32,10 +33,12 @@ export const inviteMemberSchema = z.object({
   role: z.enum(['ADMIN', 'MEMBER']),
 });
 
+const taskStatusEnum = z.enum(['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE']);
+
 export const createTaskSchema = z.object({
   title: z.string().min(1).max(500),
   description: z.string().max(10000).optional().nullable(),
-  status: z.enum(['FLOATING', 'IN_MOTION', 'LANDED']).optional(),
+  status: taskStatusEnum.optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
   dueDate: z.coerce.date().optional().nullable(),
   assigneeId: z.string().min(1).optional().nullable(),
@@ -45,7 +48,7 @@ export const createTaskSchema = z.object({
 export const updateTaskSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   description: z.string().max(10000).optional().nullable(),
-  status: z.enum(['FLOATING', 'IN_MOTION', 'LANDED']).optional(),
+  status: taskStatusEnum.optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional(),
   dueDate: z.coerce.date().optional().nullable(),
   assigneeId: z.string().min(1).optional().nullable(),
@@ -53,7 +56,7 @@ export const updateTaskSchema = z.object({
 });
 
 export const updateTaskStatusSchema = z.object({
-  status: z.enum(['FLOATING', 'IN_MOTION', 'LANDED']),
+  status: taskStatusEnum,
 });
 
 export const taskListQuerySchema = z.object({

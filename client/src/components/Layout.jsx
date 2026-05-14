@@ -3,9 +3,10 @@ import { useEffect, useCallback } from 'react';
 import Sidebar from './Sidebar';
 import QuickLaunch from './QuickLaunch';
 import { useUIStore } from '../store/ui';
+import { Moon, Sun } from 'lucide-react';
 
 export default function Layout() {
-  const { openQuickLaunch, quickLaunchOpen } = useUIStore();
+  const { openQuickLaunch, quickLaunchOpen, theme, toggleTheme } = useUIStore();
 
   const handleKeyDown = useCallback((e) => {
     // Press "/" to open quick launch (not when typing in inputs)
@@ -28,7 +29,7 @@ export default function Layout() {
     <div className="flex h-screen overflow-hidden bg-space-900">
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden relative">
         <div className="min-h-full p-6">
           <Outlet />
         </div>

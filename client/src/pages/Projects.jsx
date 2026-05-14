@@ -8,6 +8,7 @@ import { useUIStore } from '../store/ui';
 import { SkeletonCard } from '../components/Skeleton';
 import { EmptyOrbit } from '../components/EmptyState';
 import ProgressRing from '../components/ProgressRing';
+import ThemeToggle from '../components/ThemeToggle';
 
 const PLANET_COLORS = [
   '#3b82f6', '#7c3aed', '#10b981', '#f59e0b', '#ef4444',
@@ -113,13 +114,20 @@ function ProjectCard({ project, idx }) {
 function NewProjectPanel({ onClose, onCreated }) {
   const [form, setForm] = useState({ name: '', description: '', color: COLOR_OPTIONS[0] });
   const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+
+  useEffect(() => {
+    api.get('/users').then(res => setUsers(res.data.users || [])).catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) { toast.error('Project name is required'); return; }
     setLoading(true);
     try {
-      const { data } = await api.post('/projects', form);
+      const payload = { ...form, members: selectedUsers };
+      const { data } = await api.post('/projects', payload);
       toast.success(`🌍 Planet "${form.name}" launched!`);
       onCreated(data.project);
       onClose();
@@ -187,6 +195,30 @@ function NewProjectPanel({ onClose, onCreated }) {
                   }}
                 />
               ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Assign Members</label>
+            <div className="max-h-40 overflow-y-auto space-y-1 border border-white/10 rounded-lg p-2 bg-black/20">
+              {users.map(u => (
+                <label key={u.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors">
+                  <input
+                    type="checkbox"
+                    className="rounded border-white/20 bg-black/40 text-orbit-blue focus:ring-orbit-blue focus:ring-offset-space-900"
+                    checked={selectedUsers.includes(u.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedUsers(s => [...s, u.id]);
+                      else setSelectedUsers(s => s.filter(id => id !== u.id));
+                    }}
+                  />
+                  <div>
+                    <div className="text-sm text-gray-200 font-medium">{u.name}</div>
+                    <div className="text-xs text-gray-500">{u.email}</div>
+                  </div>
+                </label>
+              ))}
+              {users.length === 0 && <div className="text-xs text-gray-500 p-2 text-center">Loading members...</div>}
             </div>
           </div>
 
@@ -284,7 +316,7 @@ export default function Projects() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {(isAdmin || true) && (
+          {isAdmin && (
             <button
               id="new-project-btn"
               onClick={() => setShowPanel(true)}
@@ -294,6 +326,7 @@ export default function Projects() {
               New Planet
             </button>
           )}
+          <ThemeToggle />
         </div>
       </div>
 

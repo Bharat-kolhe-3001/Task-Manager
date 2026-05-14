@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import '../src/lib/loadEnv.js';
 import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 
@@ -80,7 +80,7 @@ async function main() {
       {
         title: 'Define API contracts',
         description: 'OpenAPI-style outline for REST endpoints',
-        status: 'LANDED',
+        status: 'DONE',
         priority: 'HIGH',
         dueDate: past,
         completedAt: new Date(),
@@ -91,7 +91,7 @@ async function main() {
       {
         title: 'Wire Prisma models',
         description: 'User, project, task relations',
-        status: 'IN_MOTION',
+        status: 'IN_PROGRESS',
         priority: 'MEDIUM',
         dueDate: soon,
         projectId: projectA.id,
@@ -101,7 +101,7 @@ async function main() {
       {
         title: 'Dashboard charts',
         description: 'Status breakdown and workload',
-        status: 'FLOATING',
+        status: 'TODO',
         priority: 'LOW',
         dueDate: null,
         projectId: projectA.id,
@@ -111,7 +111,7 @@ async function main() {
       {
         title: 'Blog post calendar',
         description: 'Q2 topics',
-        status: 'IN_MOTION',
+        status: 'IN_PROGRESS',
         priority: 'MEDIUM',
         dueDate: past,
         projectId: projectB.id,
@@ -121,7 +121,7 @@ async function main() {
       {
         title: 'Partner outreach',
         description: 'Email 10 partners',
-        status: 'FLOATING',
+        status: 'IN_REVIEW',
         priority: 'CRITICAL',
         dueDate: soon,
         projectId: projectB.id,
@@ -131,7 +131,7 @@ async function main() {
       {
         title: 'Analytics audit',
         description: 'Verify events in staging',
-        status: 'LANDED',
+        status: 'DONE',
         priority: 'LOW',
         dueDate: past,
         completedAt: new Date(),

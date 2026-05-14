@@ -2,13 +2,21 @@ import { prisma } from '../lib/prisma.js';
 import { accessibleProjectIds } from '../lib/projectAccess.js';
 import { toPublicUser } from '../lib/userPublic.js';
 
+const ACTIVE_STATUSES = ['TODO', 'IN_PROGRESS', 'IN_REVIEW'];
+
 export async function getDashboard(req, res) {
   const projectIds = await accessibleProjectIds(req.user.id);
 
   if (!projectIds.length) {
     return res.json({
+      data: {
+        totalTasks: 0,
+        overdueTasks: 0,
+        completedTasks: 0,
+        tasksByStatus: { TODO: 0, IN_PROGRESS: 0, IN_REVIEW: 0, DONE: 0 },
+      },
       totalTasks: 0,
-      tasksByStatus: { FLOATING: 0, IN_MOTION: 0, LANDED: 0 },
+      tasksByStatus: { TODO: 0, IN_PROGRESS: 0, IN_REVIEW: 0, DONE: 0 },
       overdueCount: 0,
       projectProgress: [],
       teamWorkload: [],
@@ -28,7 +36,7 @@ export async function getDashboard(req, res) {
       where: {
         projectId: { in: projectIds },
         dueDate: { lt: now },
-        status: { not: 'LANDED' },
+        status: { not: 'DONE' },
       },
     }),
     prisma.task.groupBy({
@@ -41,20 +49,23 @@ export async function getDashboard(req, res) {
       where: {
         projectId: { in: projectIds },
         assigneeId: { not: null },
-        status: { in: ['FLOATING', 'IN_MOTION'] },
+        status: { in: ACTIVE_STATUSES },
       },
       _count: { _all: true },
     }),
   ]);
 
   const tasksByStatus = {
-    FLOATING: 0,
-    IN_MOTION: 0,
-    LANDED: 0,
+    TODO: 0,
+    IN_PROGRESS: 0,
+    IN_REVIEW: 0,
+    DONE: 0,
   };
   for (const row of byStatus) {
     tasksByStatus[row.status] = row._count._all;
   }
+
+  const completedTasks = tasksByStatus.DONE ?? 0;
 
   const projectMeta = await prisma.project.findMany({
     where: { id: { in: projectIds } },
@@ -69,7 +80,7 @@ export async function getDashboard(req, res) {
     }
     const entry = progressMap.get(row.projectId);
     entry.total += row._count._all;
-    if (row.status === 'LANDED') entry.landed += row._count._all;
+    if (row.status === 'DONE') entry.landed += row._count._all;
   }
 
   const projectProgress = projectIds.map((pid) => {
@@ -105,6 +116,12 @@ export async function getDashboard(req, res) {
     .sort((a, b) => b.activeTasks - a.activeTasks);
 
   res.json({
+    data: {
+      totalTasks,
+      overdueTasks: overdueCount,
+      completedTasks,
+      tasksByStatus,
+    },
     totalTasks,
     tasksByStatus,
     overdueCount,

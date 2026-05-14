@@ -10,6 +10,7 @@ import api from '../lib/api';
 import toast from 'react-hot-toast';
 import { SkeletonBlock } from '../components/Skeleton';
 import { EmptyPlanet } from '../components/EmptyState';
+import ThemeToggle from '../components/ThemeToggle';
 
 const PRIORITY_MAP = {
   CRITICAL: { cls: 'badge-critical', label: 'Critical', order: 0 },
@@ -239,18 +240,21 @@ export default function Tasks() {
             {filtered.length} task{filtered.length !== 1 ? 's' : ''} · {filtered.filter(t => t.status === 'DONE').length} landed
           </p>
         </div>
-        <button
-          onClick={() => setShowFilters(v => !v)}
-          className={`btn-ghost gap-2 relative ${activeFilterCount > 0 ? 'border-orbit-blue/40 text-orbit-blue' : ''}`}
-        >
-          <Filter size={15} />
-          Filters
-          {activeFilterCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orbit-blue text-white text-[9px] flex items-center justify-center font-bold">
-              {activeFilterCount}
-            </span>
-          )}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowFilters(v => !v)}
+            className={`btn-ghost gap-2 relative ${activeFilterCount > 0 ? 'border-orbit-blue/40 text-orbit-blue' : ''}`}
+          >
+            <Filter size={15} />
+            Filters
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-orbit-blue text-white text-[9px] flex items-center justify-center font-bold">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* Filter Bar */}

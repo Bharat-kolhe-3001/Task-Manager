@@ -3,7 +3,7 @@ import { AppError } from '../lib/AppError.js';
 import { accessibleProjectIds, isProjectAdmin, isProjectMember } from '../lib/projectAccess.js';
 import { toPublicUser } from '../lib/userPublic.js';
 
-const TASK_STATUS = ['FLOATING', 'IN_MOTION', 'LANDED'];
+const TASK_STATUS = ['TODO', 'IN_PROGRESS', 'IN_REVIEW', 'DONE'];
 
 /**
  * @param {string[]|undefined} statuses
@@ -39,7 +39,7 @@ export async function listTasks(req, res) {
     ...(q.assignee && q.assignee !== 'me' && { assigneeId: q.assignee }),
     ...(q.overdue === true && {
       dueDate: { lt: new Date() },
-      status: { not: 'LANDED' },
+      status: { not: 'DONE' },
     }),
   };
 
@@ -79,13 +79,13 @@ export async function createTask(req, res) {
     }
   }
 
-  const completedAt = status === 'LANDED' ? new Date() : null;
+  const completedAt = status === 'DONE' ? new Date() : null;
 
   const task = await prisma.task.create({
     data: {
       title,
       description: description ?? null,
-      status: status ?? 'FLOATING',
+      status: status ?? 'TODO',
       priority: priority ?? 'MEDIUM',
       dueDate: dueDate ?? null,
       completedAt,
@@ -171,7 +171,7 @@ export async function updateTask(req, res) {
 
   let completedAt = existing.completedAt;
   if (body.status !== undefined) {
-    completedAt = body.status === 'LANDED' ? new Date() : null;
+    completedAt = body.status === 'DONE' ? new Date() : null;
   }
 
   const task = await prisma.task.update({
@@ -216,7 +216,7 @@ export async function updateTaskStatus(req, res) {
     throw new AppError('Task not found', 404, 'NOT_FOUND');
   }
 
-  const completedAt = status === 'LANDED' ? new Date() : null;
+  const completedAt = status === 'DONE' ? new Date() : null;
 
   const task = await prisma.task.update({
     where: { id },

@@ -3,20 +3,56 @@ import { AppError } from '../lib/AppError.js';
 import { toPublicUser } from '../lib/userPublic.js';
 import { accessibleProjectIds } from '../lib/projectAccess.js';
 
+function serializeMember(m) {
+  return {
+    userId: m.userId,
+    projectId: m.projectId,
+    role: m.role,
+    user: toPublicUser(m.user),
+  };
+}
+
+function serializeTask(t) {
+  return {
+    ...t,
+    assignee: t.assignee ? toPublicUser(t.assignee) : null,
+    createdBy: toPublicUser(t.createdBy),
+  };
+}
+
 export async function listProjects(req, res) {
   const ids = await accessibleProjectIds(req.user.id);
-  const projects = await prisma.project.findMany({
+  const rows = await prisma.project.findMany({
     where: { id: { in: ids } },
     orderBy: { name: 'asc' },
     include: {
       _count: { select: { tasks: true, members: true } },
+      members: { include: { user: true } },
+      tasks: {
+        include: { assignee: true, createdBy: true },
+        orderBy: [{ updatedAt: 'desc' }],
+      },
     },
   });
-  res.json({ projects });
+
+  res.json({
+    projects: rows.map((p) => ({
+      ...p,
+      members: p.members.map(serializeMember),
+      tasks: p.tasks.map(serializeTask),
+    })),
+  });
 }
 
 export async function createProject(req, res) {
-  const { name, description, color } = req.validated;
+  const { name, description, color, members = [] } = req.validated;
+
+  const memberData = [
+    { userId: req.user.id, role: 'ADMIN' },
+    ...members
+      .filter((id) => id !== req.user.id)
+      .map((id) => ({ userId: id, role: 'MEMBER' })),
+  ];
 
   const project = await prisma.project.create({
     data: {
@@ -25,15 +61,26 @@ export async function createProject(req, res) {
       color: color ?? '#6366f1',
       createdById: req.user.id,
       members: {
-        create: { userId: req.user.id, role: 'ADMIN' },
+        create: memberData,
       },
     },
     include: {
       _count: { select: { tasks: true, members: true } },
+      members: { include: { user: true } },
+      tasks: {
+        include: { assignee: true, createdBy: true },
+        orderBy: [{ updatedAt: 'desc' }],
+      },
     },
   });
 
-  res.status(201).json({ project });
+  res.status(201).json({
+    project: {
+      ...project,
+      members: project.members.map(serializeMember),
+      tasks: project.tasks.map(serializeTask),
+    },
+  });
 }
 
 export async function getProject(req, res) {
@@ -47,7 +94,10 @@ export async function getProject(req, res) {
           user: true,
         },
       },
-      _count: { select: { tasks: true } },
+      tasks: {
+        include: { assignee: true, createdBy: true },
+        orderBy: [{ updatedAt: 'desc' }],
+      },
     },
   });
 
@@ -55,34 +105,27 @@ export async function getProject(req, res) {
     throw new AppError('Project not found', 404, 'NOT_FOUND');
   }
 
-  const byStatus = await prisma.task.groupBy({
-    by: ['status'],
-    where: { projectId: id },
-    _count: { _all: true },
-  });
+  const taskCountsByStatus = {
+    TODO: 0,
+    IN_PROGRESS: 0,
+    IN_REVIEW: 0,
+    DONE: 0,
+  };
+  for (const t of project.tasks) {
+    taskCountsByStatus[t.status] += 1;
+  }
 
-  const taskCountsByStatus = Object.fromEntries(
-    byStatus.map((row) => [row.status, row._count._all]),
-  );
-
-  const { _count, members, ...rest } = project;
+  const { members, tasks, createdById, ...rest } = project;
 
   res.json({
     project: {
       ...rest,
-      members: members.map((m) => ({
-        userId: m.userId,
-        projectId: m.projectId,
-        role: m.role,
-        user: toPublicUser(m.user),
-      })),
+      ownerId: createdById,
+      members: members.map(serializeMember),
+      tasks: tasks.map(serializeTask),
       taskCounts: {
-        total: _count.tasks,
-        byStatus: {
-          FLOATING: taskCountsByStatus.FLOATING ?? 0,
-          IN_MOTION: taskCountsByStatus.IN_MOTION ?? 0,
-          LANDED: taskCountsByStatus.LANDED ?? 0,
-        },
+        total: tasks.length,
+        byStatus: taskCountsByStatus,
       },
     },
   });
@@ -99,10 +142,20 @@ export async function updateProject(req, res) {
       ...(body.description !== undefined && { description: body.description }),
       ...(body.color !== undefined && { color: body.color }),
     },
-    include: { _count: { select: { tasks: true, members: true } } },
+    include: {
+      _count: { select: { tasks: true, members: true } },
+      members: { include: { user: true } },
+      tasks: { include: { assignee: true, createdBy: true }, orderBy: [{ updatedAt: 'desc' }] },
+    },
   });
 
-  res.json({ project });
+  res.json({
+    project: {
+      ...project,
+      members: project.members.map(serializeMember),
+      tasks: project.tasks.map(serializeTask),
+    },
+  });
 }
 
 export async function archiveProject(req, res) {

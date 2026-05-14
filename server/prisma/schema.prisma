@@ -18,9 +18,10 @@ enum ProjectMemberRole {
 }
 
 enum TaskStatus {
-  FLOATING
-  IN_MOTION
-  LANDED
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
 }
 
 enum TaskPriority {
@@ -75,7 +76,7 @@ model Task {
   id          String       @id @default(cuid())
   title       String
   description String?
-  status      TaskStatus   @default(FLOATING)
+  status      TaskStatus   @default(TODO)
   priority    TaskPriority @default(MEDIUM)
   dueDate     DateTime?
   completedAt DateTime?

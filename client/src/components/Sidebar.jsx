@@ -22,7 +22,7 @@ const ROLE_COLORS = {
 
 export default function Sidebar() {
   const { user, logout } = useAuthStore();
-  const { sidebarCollapsed, toggleSidebar } = useUIStore();
+  const { sidebarCollapsed, toggleSidebar, theme, toggleTheme } = useUIStore();
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U';
 
