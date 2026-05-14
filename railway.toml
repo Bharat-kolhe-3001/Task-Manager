@@ -1,0 +1,16 @@
+[build]
+builder = "NIXPACKS"
+
+[[services]]
+name = "backend"
+source = "server"
+startCommand = "npm start"
+
+[[services]]
+name = "frontend"  
+source = "client"
+startCommand = "npm run preview"
+
+[[services]]
+name = "postgres"
+plugin = "postgresql"
