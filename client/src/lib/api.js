@@ -2,9 +2,12 @@ import axios from 'axios';
 
 // In dev, default to same-origin `/api` so Vite can proxy to Express (vite.config.js).
 // In production, set VITE_API_URL to your API root, e.g. https://api.example.com/api
+// In dev Vite proxies /api → Express (vite.config.js).
+// In production set VITE_API_URL to your Railway backend URL, e.g.:
+//   https://orbit-backend-production.up.railway.app/api
 const baseURL =
   import.meta.env.VITE_API_URL?.trim() ||
-  (import.meta.env.DEV ? '/api' : 'http://localhost:3000/api');
+  (import.meta.env.DEV ? '/api' : '/api');
 
 const api = axios.create({
   baseURL,

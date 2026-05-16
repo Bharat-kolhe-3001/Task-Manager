@@ -1,16 +1,4 @@
+# Root railway.toml — each service (server/ and client/) has its own railway.toml.
+# This file is kept for reference only.
 [build]
 builder = "NIXPACKS"
-
-[[services]]
-name = "backend"
-source = "server"
-startCommand = "npm start"
-
-[[services]]
-name = "frontend"  
-source = "client"
-startCommand = "npm run preview"
-
-[[services]]
-name = "postgres"
-plugin = "postgresql"
