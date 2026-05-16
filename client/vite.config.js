@@ -12,7 +12,7 @@ export default defineConfig({
     proxy: {
       // Browser calls /api/* on the Vite port; forward to Express (see client/src/lib/api.js)
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://127.0.0.1:3000',
         changeOrigin: true,
       },
     },
