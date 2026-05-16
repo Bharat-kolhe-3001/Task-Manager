@@ -1,4 +1,8 @@
-# Root railway.toml — each service (server/ and client/) has its own railway.toml.
-# This file is kept for reference only.
 [build]
 builder = "NIXPACKS"
+buildCommand = "cd server && npm install && npx prisma generate"
+
+[deploy]
+startCommand = "cd server && npm start"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
