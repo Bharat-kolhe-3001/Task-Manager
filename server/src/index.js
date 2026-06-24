@@ -65,3 +65,9 @@ if (!process.env.JWT_SECRET) {
 app.listen(PORT, () => {
   console.log(`Orbit API listening on port ${PORT}`);
 });
+app.get("/", (req, res) => {
+  res.json({
+    status: "success",
+    message: "Orbit Task Manager API is running"
+  });
+});
