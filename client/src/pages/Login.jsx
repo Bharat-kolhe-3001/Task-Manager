@@ -51,15 +51,14 @@ export default function Login() {
       toast.success(isLogin ? `Welcome back, ${data.user.name}! 🚀` : 'Account created! 🎉');
       navigate('/dashboard');
     } catch (err) {
-     console.log("Full Error:", err.response);
+  console.log("Complete Error Object:", err);
+  console.log("Error Message:", err.message);
+  console.log("Error Code:", err.code);
+  console.log("Response:", err.response);
+  console.log("Request:", err.request);
 
-toast.error(
-  err.response?.data?.error ||
-  err.response?.data?.message ||
-  JSON.stringify(err.response?.data) ||
-  err.message
-);
-    } finally {
+  toast.error(err.message);
+} finally {
       setLoading(false);
     }
   };
