@@ -51,7 +51,14 @@ export default function Login() {
       toast.success(isLogin ? `Welcome back, ${data.user.name}! 🚀` : 'Account created! 🎉');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Authentication failed');
+     console.log("Full Error:", err.response);
+
+toast.error(
+  err.response?.data?.error ||
+  err.response?.data?.message ||
+  JSON.stringify(err.response?.data) ||
+  err.message
+);
     } finally {
       setLoading(false);
     }
