@@ -18,9 +18,11 @@ export default defineConfig({
     },
   },
   // Production preview server (used by Railway)
-  preview: {
-    host: '0.0.0.0',
-    port: Number(process.env.PORT) || 4173,
-    allowedHosts: 'all',
-  },
+ preview: {
+  host: "0.0.0.0",
+  port: Number(process.env.PORT) || 4173,
+  allowedHosts: [
+    "vivacious-reverence-production-e1c4.up.railway.app",
+  ],
+},
 })
